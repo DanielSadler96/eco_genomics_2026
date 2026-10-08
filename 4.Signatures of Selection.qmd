@@ -1,0 +1,30 @@
+---
+title: "4. Signatures of selection"
+format: html
+editor: visual
+---
+
+## Signatures of selection
+
+### FST
+
+### BayPass
+
+Using Bayesian selection scans to identify regions under selection. This is very computatively expensive for large genomic files and needs repeating for accuracy, but is the gold standard for selection scans and is highly flexible, where we can add auxiilary models and contrasts that we will come to later in the course. 
+
+First we need to get the data in the correct format: 
+
+```{bash}
+pop=$(sed -n "${SLURM_ARRAY_TASK_ID}p" $WORK/pop_prefixes.txt)
+
+vcftools --gzvcf Balanus_glandula_filtered.vcf.gz \
+        --keep ${pop}_samples.txt \
+        --freq \
+        --out ${pop}_AF
+
+vcftools --gzvcf Balanus_glandula_filtered.vcf.gz \
+        --keep ${pop}_samples.txt \
+        --count \
+        --out ${pop}_AF_count 
+```
+

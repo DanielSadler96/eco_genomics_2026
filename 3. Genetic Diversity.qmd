@@ -1,0 +1,61 @@
+---
+title: "3. Genetic Diversity"
+format: typst
+editor: visual
+---
+
+# Genetic Diversity
+
+## Nucleotide Diversity 
+
+There are many different ways to measure nucleotide diversity, in this case we will use vcftools. Note that vcftools can be inaccarate as it doesnt include invariants in the analysis and is biased by missing data, so we can use a programme like pixy <https://pixy.readthedocs.io/en/latest/about.html>. But this can be a little fiddly to set up so for now lets keep it simple
+
+
+```{bash}
+vcftools --gzvcf myvcf.vcf.gz --window-pi 10000  --out allpi
+```
+
+
+Lets get the nucleotide diversity per population:
+
+```{bash}
+VCF="snpcall.final.rmdup.chr.all.flt3.vcf"     
+POPMAP="popmap.txt"       # tab-separated sample pop file has to match sample ID when using -query
+OUTDIR="vcftools_pi"
+WINDOW=10000
+ 
+mkdir -p "$OUTDIR"
+ 
+cut -f2 "$POPMAP" | sort -u | while read -r POP; do
+  echo "== $POP =="
+  awk -v pop="$POP" -F'\t' '$2 == pop {print $1}' "$POPMAP" > "$OUTDIR/${POP}.samples.txt"
+ 
+  vcftools \
+    --gzvcf "$VCF" \
+    --keep "$OUTDIR/${POP}.samples.txt" \
+    --window-pi "$WINDOW" \
+    --window-pi-step "$WINDOW" \
+    --out "$OUTDIR/${POP}"
+ 
+  ## (2) per-site pi -- to be binned into 100kb windows afterwards
+  vcftools \
+    --gzvcf "$VCF" \
+    --keep "$OUTDIR/${POP}.samples.txt" \
+    --site-pi \
+    --out "$OUTDIR/${POP}"
+done
+ 
+echo "Done. Per-population output in ${OUTDIR}/<population>.windowed.pi and .sites.pi"
+```
+
+We added some complexity here, but we are essentially running a loop through each population to calculate nucleotide diversity where we are using `while` `do` `done` a common loop in bash. 
+
+## Tajimas D
+
+We can also look at whether regions of the genome are under neutral, postive or balancing selection using Tajima's D
+where the loci would neutral when Tajima's D = 0, postively selected when Tajima's D < 1 and under balancing selection when Tajima's D > 1
+
+```{bash}
+vcftools --gzvcf myvcf.vcf.gz --TajimaD 10000  --out allpi
+```
+
