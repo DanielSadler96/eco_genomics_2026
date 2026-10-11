@@ -116,11 +116,10 @@ First, make a folder for today's work and move into it.
 Then store the location of the VCF in a **variable**, so we don't have to type the full path every time:
 
 ```{bash}
-mkdir -p ~/popgen/class2
-cd ~/popgen/class2
+mkdir -p ~/path/to/my/directory/PopulationGenomics/Population structure 
 
 # where the VCF lives (make sure this is the right path!)
-DATA_DIR=/users/d/s/dsadler1/Pi_shared/MultiSpeciesGO/Lottiagigantea/assembly/VCF/random
+DATA_DIR=/path/to/my/directory/PopulationGenomics
 VCF=$DATA_DIR/Lottia_gigantea_biallelic.vcf.gz
 
 # check the variable holds what you expect, and that the file is really there
