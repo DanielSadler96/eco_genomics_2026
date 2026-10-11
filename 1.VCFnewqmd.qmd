@@ -101,6 +101,20 @@ Rare alleles carry information about population history. Filtering on MAF is sta
 
 # Looking inside a VCF
 
+As with the transcriptomic data lets copy over the VCF's that I have already created for you.
+
+``` bash
+
+##Lets first create a new folder for our new module
+
+### go to your ecol genomics folder something like: "~/projects/eco_genomics_2026/" and make your new directory
+mkdir -p PopulationGenomics 
+
+##copy the VCF files to your directory
+cp /gpfs1/cl/biol3990/PopulationGenomics/VCF/*.vcf* /path/to/my/directory/PopulationGenomics
+
+```
+
 ## A first look
 
 VCFs are usually compressed with `bgzip` (hence `.vcf.gz`) because they are often very large. `zcat` decompresses the file and sends it to the screen, and `head` keeps only the first 20 lines:

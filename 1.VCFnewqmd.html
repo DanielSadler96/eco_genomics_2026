@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Daniel Sadler">
-<meta name="dcterms.date" content="2026-10-08">
+<meta name="dcterms.date" content="2026-10-11">
 
 <title>Working with VCF files</title>
 <style>
@@ -2225,7 +2225,7 @@ vertical-align: -.125em;
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">8 October 2026</p>
+        <p class="date">11 October 2026</p>
       </div>
     </div>
     
@@ -2437,10 +2437,19 @@ Note
 </section>
 <section id="looking-inside-a-vcf" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Looking inside a VCF</h1>
+<p>As with the transcriptomic data lets copy over the VCF’s that I have already created for you.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">##Lets first create a new folder for our new module</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">### go to your ecol genomics folder something like: &quot;~/projects/eco_genomics_2026/&quot; and make your new directory</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> PopulationGenomics </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">##copy the VCF files to your directory</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /gpfs1/cl/biol3990/PopulationGenomics/VCF/<span class="pp">*</span>.vcf<span class="pp">*</span> /path/to/my/directory/PopulationGenomics</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="a-first-look" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="a-first-look"><span class="header-section-number">3.1</span> A first look</h2>
 <p>VCFs are usually compressed with <code>bgzip</code> (hence <code>.vcf.gz</code>) because they are often very large. <code>zcat</code> decompresses the file and sends it to the screen, and <code>head</code> keeps only the first 20 lines:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 20</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 20</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>You will mostly see a stream of <code>##contig</code> lines (long lines have been shortened with <code>...</code> here):</p>
 <pre class="text"><code>##fileformat=VCFv4.2
 ##FILTER=&lt;ID=PASS,Description=&quot;All filters passed&quot;&gt;
@@ -2473,13 +2482,13 @@ Note
 <section id="reading-the-header-with-bcftools" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="reading-the-header-with-bcftools"><span class="header-section-number">3.2</span> Reading the header with bcftools</h2>
 <p>A better way to look at a VCF is with our first tool, <code>bcftools</code>. Load it on the VACC first, and always record which version you are using:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load gcc</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load bcftools</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> <span class="at">--version</span>   <span class="co"># record the versions you use in your methods</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> <span class="at">-h</span>          <span class="co"># -h or --help usually gets you the manual</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> head Lottia_gigantea_biallelic.vcf.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load gcc</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load bcftools</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> <span class="at">--version</span>   <span class="co"># record the versions you use in your methods</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> <span class="at">-h</span>          <span class="co"># -h or --help usually gets you the manual</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> head Lottia_gigantea_biallelic.vcf.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled" title="Accessing the manual">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2494,7 +2503,7 @@ Note
 </div>
 </div>
 <p>Again we get a big string of contig lines. Let’s pipe (<code>|</code>) the output into <code>grep</code> to remove them:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> head Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;##contig=&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> head Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;##contig=&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled" title="grep">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2509,10 +2518,10 @@ Note
 </div>
 </div>
 <p>Better. Now you can see how the file was made and what each field means. Each <code>##INFO</code> and <code>##FORMAT</code> line defines one of the tags used in the body of the file:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;^##INFO&quot;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;^##FORMAT&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;^##INFO&quot;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;^##FORMAT&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bcftools</code> also writes every command it runs into the header (in lines containing <code>Command=</code>), so you can often reconstruct how a file was made and filtered:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;Command=&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;Command=&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="the-vcf-columns" class="level2" data-number="3.3">
 <h2 data-number="3.3" class="anchored" data-anchor-id="the-vcf-columns"><span class="header-section-number">3.3</span> The VCF columns</h2>
@@ -2584,10 +2593,10 @@ Note
 <section id="listing-samples" class="level2" data-number="3.4">
 <h2 data-number="3.4" class="anchored" data-anchor-id="listing-samples"><span class="header-section-number">3.4</span> Listing samples</h2>
 <p>The VCF also stores our sample names, which we can list with <code>bcftools query -l</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> Lottia_gigantea_biallelic.vcf.gz</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># count the samples by piping into wc -l (counts lines)</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> Lottia_gigantea_biallelic.vcf.gz</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># count the samples by piping into wc -l (counts lines)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Question">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2605,17 +2614,17 @@ Note
 <section id="reading-a-variant-record" class="level2" data-number="3.5">
 <h2 data-number="3.5" class="anchored" data-anchor-id="reading-a-variant-record"><span class="header-section-number">3.5</span> Reading a variant record</h2>
 <p>Let’s look at the first few SNPs to see what our data look like. The <code>-H</code> option drops the header so we only see variant records:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># just the first record</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 1</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># the first 5 records; less -S stops long lines wrapping (press q to exit)</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5 <span class="kw">|</span> <span class="fu">less</span> <span class="at">-S</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># -v selects variant types: here SNPs only</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-v</span> snps Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5 <span class="kw">|</span> <span class="fu">less</span> <span class="at">-S</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># what do you notice when we ask for indels?</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-v</span> indels Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5 <span class="kw">|</span> <span class="fu">less</span> <span class="at">-S</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># just the first record</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 1</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># the first 5 records; less -S stops long lines wrapping (press q to exit)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5 <span class="kw">|</span> <span class="fu">less</span> <span class="at">-S</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># -v selects variant types: here SNPs only</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-v</span> snps Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5 <span class="kw">|</span> <span class="fu">less</span> <span class="at">-S</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># what do you notice when we ask for indels?</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-v</span> indels Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5 <span class="kw">|</span> <span class="fu">less</span> <span class="at">-S</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-warning callout-titled" title="Always limit the output">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2725,50 +2734,50 @@ Note
 <section id="viewing-a-region" class="level2" data-number="3.6">
 <h2 data-number="3.6" class="anchored" data-anchor-id="viewing-a-region"><span class="header-section-number">3.6</span> Viewing a region</h2>
 <p>Because the VCF is compressed with <code>bgzip</code>, <code>bcftools</code> can jump straight to a region of interest without reading the whole file, using the <code>-r</code> option with <code>chromosome:start-end</code>. This needs an index file (<code>.csi</code> or <code>.tbi</code>) next to the VCF; if there isn’t one, <code>bcftools index</code> will make it, (I have already generated the index for you)</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> Lottia_gigantea_biallelic.vcf.gz<span class="pp">*</span>   <span class="co"># is there a .csi or .tbi index?</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># all SNPs between positions 8,000 and 9,000 on scaffold KB201661.1</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-r</span> KB201661.1:8000-9000 Lottia_gigantea_biallelic.vcf.gz</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># for a large region, pipe into head</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-r</span> KB201661.1:8000-9000 Lottia_gigantea_biallelic.vcf.gz <span class="dt">\</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> Lottia_gigantea_biallelic.vcf.gz<span class="pp">*</span>   <span class="co"># is there a .csi or .tbi index?</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># all SNPs between positions 8,000 and 9,000 on scaffold KB201661.1</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-r</span> KB201661.1:8000-9000 Lottia_gigantea_biallelic.vcf.gz</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># for a large region, pipe into head</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-r</span> KB201661.1:8000-9000 Lottia_gigantea_biallelic.vcf.gz <span class="dt">\</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="pulling-out-specific-fields" class="level2" data-number="3.7">
 <h2 data-number="3.7" class="anchored" data-anchor-id="pulling-out-specific-fields"><span class="header-section-number">3.7</span> Pulling out specific fields</h2>
 <p><code>bcftools query -f</code> prints only the fields you ask for, which is how we will get data out of a VCF and into other programs. Fields are written as <code>%NAME</code>, <code>\t</code> is a tab, <code>\n</code> is a new line, and anything in square brackets is repeated for every sample:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># scaffold, position, alleles and every individual&#39;s genotype for the first 5 SNPs</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%REF\t%ALT[\t%GT]\n&#39;</span> <span class="dt">\</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># scaffold, position, alleles and every individual&#39;s genotype for the first 5 SNPs</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%REF\t%ALT[\t%GT]\n&#39;</span> <span class="dt">\</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    Lottia_gigantea_biallelic.vcf.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
 <section id="summary-statistics-with-vcftools" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Summary statistics with vcftools</h1>
 <p>Switching gears, let’s get some basic statistics from our VCF using <code>vcftools</code>. To save time in class we will use a subset containing a random 1% of the variants, which you can also use for many of the downstream analyses yourself. The subset was made like this (you don’t need to run it):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view Lottia_gigantea_biallelic.vcf.gz <span class="dt">\</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">|</span> <span class="ex">vcfrandomsample</span> <span class="at">-r</span> 0.01 <span class="dt">\</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">|</span> <span class="ex">bgzip</span> <span class="at">-c</span> <span class="op">&gt;</span> Lottia_gigantea_biallelic_sub0.01.vcf.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view Lottia_gigantea_biallelic.vcf.gz <span class="dt">\</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">|</span> <span class="ex">vcfrandomsample</span> <span class="at">-r</span> 0.01 <span class="dt">\</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">|</span> <span class="ex">bgzip</span> <span class="at">-c</span> <span class="op">&gt;</span> Lottia_gigantea_biallelic_sub0.01.vcf.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now calculate the proportion of missing data and the mean depth for each individual:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load vcftools</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># proportion of missing genotypes per individual -&gt; missing_data.imiss</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic_sub0.01.vcf.gz <span class="at">--missing-indv</span> <span class="at">--out</span> missing_data</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># mean depth per individual -&gt; depth_data.idepth</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic_sub0.01.vcf.gz <span class="at">--depth</span> <span class="at">--out</span> depth_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>In <code>missing_data.imiss</code>, the <code>F_MISS</code> column is the proportion of sites with a missing genotype for each individual; in <code>depth_data.idepth</code>, <code>MEAN_DEPTH</code> is each individual’s average read depth. Individuals with lots of missing data or very low depth can distort the population structure analyses we will run next, so it is worth plotting these in R:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load vcftools</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>imiss  <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">&quot;missing_data.imiss&quot;</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>idepth <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">&quot;depth_data.idepth&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># proportion of missing genotypes per individual -&gt; missing_data.imiss</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic_sub0.01.vcf.gz <span class="at">--missing-indv</span> <span class="at">--out</span> missing_data</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(imiss, <span class="fu">aes</span>(<span class="at">x =</span> F_MISS)) <span class="sc">+</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Proportion of missing genotypes&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Number of individuals&quot;</span>)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(idepth, <span class="fu">aes</span>(<span class="at">x =</span> MEAN_DEPTH)) <span class="sc">+</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Mean depth&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Number of individuals&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># mean depth per individual -&gt; depth_data.idepth</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic_sub0.01.vcf.gz <span class="at">--depth</span> <span class="at">--out</span> depth_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In <code>missing_data.imiss</code>, the <code>F_MISS</code> column is the proportion of sites with a missing genotype for each individual; in <code>depth_data.idepth</code>, <code>MEAN_DEPTH</code> is each individual’s average read depth. Individuals with lots of missing data or very low depth can distort the population structure analyses we will run next, so it is worth plotting these in R:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>imiss  <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">&quot;missing_data.imiss&quot;</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>idepth <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">&quot;depth_data.idepth&quot;</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(imiss, <span class="fu">aes</span>(<span class="at">x =</span> F_MISS)) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Proportion of missing genotypes&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Number of individuals&quot;</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(idepth, <span class="fu">aes</span>(<span class="at">x =</span> MEAN_DEPTH)) <span class="sc">+</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Mean depth&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Number of individuals&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="your-first-batch-job" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Your first batch job</h1>
@@ -2846,26 +2855,26 @@ Note
 </tbody>
 </table>
 <p>Save the following as <code>vcf_stats.sh</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --job-name=vcf_stats</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --partition=general</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mem=40G</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=30:00:00</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=./logs/%x.%j.out</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=./logs/%x.%j.err</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=NETID@uvm.edu</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load vcftools</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic.vcf.gz <span class="at">--missing-indv</span> <span class="at">--out</span> missing_data</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic.vcf.gz <span class="at">--depth</span> <span class="at">--out</span> depth_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --job-name=vcf_stats</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --partition=general</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mem=40G</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=30:00:00</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=./logs/%x.%j.out</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=./logs/%x.%j.err</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=NETID@uvm.edu</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load vcftools</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic.vcf.gz <span class="at">--missing-indv</span> <span class="at">--out</span> missing_data</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="ex">vcftools</span> <span class="at">--gzvcf</span> Lottia_gigantea_biallelic.vcf.gz <span class="at">--depth</span> <span class="at">--out</span> depth_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Then submit and keep an eye on it:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> vcf_stats.sh      <span class="co"># submit the job; Slurm replies with a job ID</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span>          <span class="co"># check your jobs (PD = pending, R = running)</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ex">scancel</span> <span class="op">&lt;</span>jobid<span class="op">&gt;</span>          <span class="co"># cancel a job if you need to</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> vcf_stats.sh      <span class="co"># submit the job; Slurm replies with a job ID</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span>          <span class="co"># check your jobs (PD = pending, R = running)</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">scancel</span> <span class="op">&lt;</span>jobid<span class="op">&gt;</span>          <span class="co"># cancel a job if you need to</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>After it has run if you did <code>#SBATCH --mail-type=ALL</code> you should get an email stating it is done, you should check that your outfiles now exist and also check your log files within the folder “log” named as <code>.out</code> and <code>.err</code></p>
 </section>
 <section id="exercises" class="level1" data-number="6">
